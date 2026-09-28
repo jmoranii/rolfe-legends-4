@@ -90,7 +90,10 @@ The complete text, in play order, is **§7 below** (generated from the code). Th
 - e2e 145/145 in Chromium + WebKit, including a full three-world run, offline boot, the ending video path, and the cousins' secret
 - smoke tour: every screen in every look, `docs/smoke/`
 
-## 6. Publish checklist (Phase 8; James said go Sun 2026-09-27: squash, then publish)
+## 6. Publish checklist (Phase 8): done Sun 2026-09-27
+
+**Live at <https://jmoranii.github.io/rolfe-legends-4/>** (verified 2026-09-27). The public repo got one squashed commit; the full build history stays on the Mac in the `build-history` branch. Still yours: step 3 (install on the tablets) and watching the video with the boys.
+
 
 0. **One choice first (Hugo's rec: yes).** Four early local commits still contain the 38 Dreamhouse paintings *with* the copied Barbie logos (replaced before ship; the current files are clean). To keep them out of the public history, push a single squashed commit and keep the full build history on a local-only branch:
    `git -C ~/code/rolfe-legends-4 branch build-history && git -C ~/code/rolfe-legends-4 checkout --orphan release && git -C ~/code/rolfe-legends-4 commit -m "Rolfe Legends 4: Attack of the Cousins" && git -C ~/code/rolfe-legends-4 branch -M release main` (then push `main` only; `build-history` stays on the Mac).
