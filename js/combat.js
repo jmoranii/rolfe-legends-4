@@ -528,7 +528,8 @@ function pickHandTargets(state) {
     if (!it || !it.pickHand) continue;
     const pool = state.hand.filter((c) => {
       const info = cardInfo(c);
-      if (!info || info.signature || info.noSteal || info.unplayable) return false;
+      if (!info || info.signature || info.unplayable) return false;
+      if (info.noSteal && it.pickHand === 'steal') return false; // theft protection only (§13), not slime immunity
       if (it.pickHand === 'slime') return info.cost !== null && !state.slimed.includes(c.uid);
       return true;
     });

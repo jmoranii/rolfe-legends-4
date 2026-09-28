@@ -180,18 +180,21 @@ export function playEndingVideo(deps, onDone, onFail) {
   v.preload = 'auto';
   v.controls = false;
   root.appendChild(v);
-  let settled = false, stallTimer = 0;
-  const done = (ok) => { if (settled) return; settled = true; clearTimeout(stallTimer); v.pause(); root.remove(); (ok ? onDone : onFail)(); };
-  // offline and out of buffered video (only part was ever fetched): the credits take over
-  v.addEventListener('waiting', () => {
-    clearTimeout(stallTimer);
-    stallTimer = setTimeout(() => { if (!navigator.onLine && v.readyState < 3) done(false); }, 4000);
-  });
+  let settled = false, started = false, lastT = -1, still = 0;
+  // stall watchdog: once playing, if the picture stops moving (buffer ran out) for 4 s offline or
+  // 15 s online, the karaoke credits take over. Checked every second, so going offline mid-stall counts.
+  const watch = setInterval(() => {
+    if (!started || v.paused || v.ended) { still = 0; return; }
+    if (v.currentTime !== lastT) { lastT = v.currentTime; still = 0; return; }
+    still += 1;
+    if (still >= (navigator.onLine ? 15 : 4)) done(false);
+  }, 1000);
+  const done = (ok) => { if (settled) return; settled = true; clearInterval(watch); v.pause(); root.remove(); (ok ? onDone : onFail)(); };
   skipBtn(deps, root, () => done(true));
   v.addEventListener('ended', () => done(true));
   v.addEventListener('error', () => done(false));
   const failTimer = setTimeout(() => { if (v.readyState < 2) done(false); }, 6000);
-  v.addEventListener('playing', () => { clearTimeout(failTimer); clearTimeout(stallTimer); });
+  v.addEventListener('playing', () => { clearTimeout(failTimer); started = true; });
   const p = v.play();
   if (p && p.catch) {
     p.catch(() => {

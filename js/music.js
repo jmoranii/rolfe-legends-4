@@ -77,11 +77,12 @@ function fade(audio, to, ms, onDone) {
 // Public: request a track. Crossfades from whatever's playing. Unknown/missing → silence.
 export function play(name) {
   if (!TRACKS.includes(name)) name = null;
+  while (name && missing.has(name) && FALLBACK[name]) name = FALLBACK[name]; // resolve stand-ins before fading anything
   current = name;
   if (!enabled || !unlocked) return;     // remembered; starts on unlock
   // fade out everything that isn't the target
   for (const [n, e] of els) {
-    if (n !== name && !e.audio.paused) fade(e.audio, 0, FADE_MS, () => e.audio.pause());
+    if (n !== name && !e.audio.paused) fade(e.audio, 0, FADE_MS, () => { if (current !== n) e.audio.pause(); }); // not if it became the target again
   }
   if (!name) return;
   const e = getEl(name);

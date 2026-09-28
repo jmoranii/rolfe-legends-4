@@ -85,9 +85,9 @@ The complete text, in play order, is **§7 below** (generated from the code). Th
 
 **Tests.**
 
-- 564 unit tests
+- 565 unit tests
 - `node test/selfplay.mjs 150`: rails ALL CLEAR, plus the Sass ladder
-- e2e 145/145 in Chromium + WebKit, including a full three-world run, offline boot, the ending video path, and the cousins' secret
+- e2e 153/153 in Chromium + WebKit, including a full three-world run, offline boot, the ending video path, and the cousins' secret
 - smoke tour: every screen in every look, `docs/smoke/`
 
 ## 6. Publish checklist (Phase 8): done Sun 2026-09-27

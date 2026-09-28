@@ -261,6 +261,25 @@ async function mechanicsSuite(browserType, name) {
   await page.locator('.modal .btn', { hasText: 'Save it for later' }).click();
   ok(await page.locator('.btn', { hasText: 'rare card' }).count() === 0, `${name}: #2 the Arena prize can't be claimed twice`);
   ok(await rl4(page, () => window.__RL4.run.deck.length) === deck0 + 1, `${name}: #2 exactly one rare card was added`);
+  // Astra #3: a full pouch + the Arena's SUPER pet survives a reload (the swap is offered again)
+  await rl4(page, () => { document.querySelectorAll('.modal-veil,.cutscene').forEach((m) => m.remove()); window.__RL4.dev.start('aaron', 13, 1); const r = window.__RL4.run; r.pets = [{ id: 'pink_poodle', fights: 0 }, { id: 'pony_pal', fights: 0 }, { id: 'glitter_kitten', fights: 0 }]; r.coins = 999; window.__RL4.dev.arena(); });
+  await page.locator('.btn', { hasText: 'Pay' }).click();
+  await rl4(page, () => { for (let w = 0; w < 3; w++) { const st = window.__RL4.combat; for (const e of window.__RL4.C.livingEnemies(st)) window.__RL4.C.dealDamage(st, e, 9999, { attacker: st.hero }); } window.__RL4.dev.refresh(); });
+  await page.waitForSelector('.victory-beat', { timeout: 8000 }).catch(() => {});
+  await page.locator('.btn', { hasText: 'Keep going' }).click();
+  await page.locator('.btn', { hasText: 'SUPER money pet' }).click();
+  ok(await page.locator('.treasure-pop .btn', { hasText: 'home' }).count() >= 1, `${name}: Astra #3 full pouch → the swap is offered`);
+  await page.reload({ waitUntil: 'load' });
+  await page.locator('.btn', { hasText: 'Continue' }).click();
+  ok(await page.locator('.treasure-pop .btn', { hasText: 'home' }).count() >= 1, `${name}: Astra #3 after a reload the SUPER pet swap is offered again (not lost)`);
+  await page.locator('.treasure-pop .btn', { hasText: 'home' }).first().click();
+  ok(await rl4(page, () => window.__RL4.run.pets.length === 3 && window.__RL4.run.pets.some((p) => !['pink_poodle', 'pony_pal', 'glitter_kitten'].includes(p.id))), `${name}: Astra #3 the SUPER pet joined`);
+  // Astra #2: the World 3 visitor counts as given the moment its boss treasure is picked
+  await rl4(page, () => { document.querySelectorAll('.modal-veil,.cutscene').forEach((m) => m.remove()); window.__RL4.dev.start('wyatt', 21, 3); window.__RL4.dev.visitor(); });
+  await zapTips(page);
+  await page.locator('.btn', { hasText: 'boss treasure' }).click();
+  await page.locator('.modal .btn.gold').first().click();
+  ok(await rl4(page, () => JSON.parse(localStorage.getItem('rl4_run') || '{}').visitorDone === true), `${name}: Astra #2 the visitor is saved as done once the boss treasure is picked`);
   ok(page._errors.length === 0, `${name}: mechanics — no page errors (${page._errors.slice(0, 2).join(' | ')})`);
   await browser.close();
 }

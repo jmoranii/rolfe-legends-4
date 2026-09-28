@@ -561,7 +561,7 @@ function handleVisitor(offer, rng) {
   if (r.pick === 'rare') return pickFromCards('🌟 Choose a rare card', r.options, (id) => { run.deck.push(makeCard(id)); done(); });
   if (r.pick === 'remove') return multiPickDeck(`✂️ Remove ${r.n} starter cards`, r.options, r.n, (cards) => { for (const c of cards) R.removeCard(run, c.uid); done(); });
   if (r.pick === 'upgrade') return multiUpgrade(r.n, done);
-  if (r.pick === 'boss') return pickTreasure('👑 Choose a boss treasure', r.options, done);
+  if (r.pick === 'boss') return pickTreasure('👑 Choose a boss treasure', r.options, done, () => { run.visitorDone = true; }); // saved with the treasure, before any sticker picker
   if (r.pick === 'duplicate') return pickCardModal('👯 Copy which card?', r.options, (c) => { R.duplicateCard(run, c.uid); toast(`👯 Another ${CARDS[c.id].name}!`); done(); });
   return done();
 }
@@ -1426,8 +1426,10 @@ function showArenaPrize(onDone) {
     if (a.prize !== 'pending') return;
     lock();
     const r = R.arenaPrize(run, 'pet', rng);
+    // the pet (or its full-pouch swap) is the resumable after-fight pet step, so a reload can't lose it
+    a.petId = r.pet; a.petResult = r.petResult; a.petDone = false;
     claimed();
-    showPetPop(r.pet, r.petResult, onDone);
+    onDone();
   };
   card.onclick = () => {
     if (a.prize !== 'pending') return;
@@ -1785,7 +1787,7 @@ function showCrown(heroId, sl, unlocked, newSass, secrets = 0) {
   if (unlocked) s.appendChild(el('div', 'speaker-line', `💅 <b>Sass Level ${newSass} unlocked!</b> Pick it when you start a new game. ${C.SASS_LEVELS[newSass]}`));
   s.appendChild(el('p', 'subtitle', secrets >= 3 ? '🤫 You found ALL 3 cousin secrets!' : `🤫 You found ${secrets} of 3 cousin secrets. Look closer next time…`));
   const again = el('button', 'btn secondary', '🎬 Watch the ending again');
-  again.onclick = () => playEnding(heroId, () => showCrown(heroId, sl, false, newSass));
+  again.onclick = () => playEnding(heroId, () => showCrown(heroId, sl, false, newSass, secrets));
   const home = el('button', 'btn gold', '🏠 Back to the title');
   home.onclick = showTitle;
   s.append(again, home);

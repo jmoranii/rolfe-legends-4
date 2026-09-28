@@ -379,6 +379,14 @@ const card = (st, id) => st.hand.find((c) => c.id === id);
   C.endTurn(st);
   ok(!st.enemies[0].state.held, '#5 Apple Juice (Liam\'s meter card) is never stolen');
 }
+{ // Astra #6: theft protection is not slime immunity — Ooze can still slime Apple Juice
+  const { st } = combatVs(['mesh_squish_ball'], { hero: 'liam' });
+  forceHand(st, ['sippy_cup']);
+  const uid = st.hand[0].uid;
+  st.enemies[0].intent = { name: 'Ooze', kind: 'debuff', pickHand: 'slime', fn: (s, e) => C.slimeCard(s, e) };
+  C.endTurn(st);
+  ok(st.slimed.includes(uid), 'Astra #6 Ooze can slime a steal-protected card (Apple Juice)');
+}
 { // #7 enemy block expires for the whole group before anyone acts (Teddy's gift survives)
   const { st } = combatVs(['bunny_guest', 'teddy_in_a_tiara', 'dino_guest'], { hero: 'aaron' });
   st.hero.hp = st.hero.maxHp = 999;
